@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codecraft-config
+data:
+  NEXT_PUBLIC_CONVEX_URL: "https://proficient-squirrel-720.convex.cloud"
+  CONVEX_DEPLOYMENT: "dev:proficient-squirrel-720"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_aGVhbHRoeS1odXNreS04NS5jbGVyay5hY2NvdW50cy5kZXYk"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: codecraft-secrets
+type: Opaque
+data:
+  CLERK_SECRET_KEY: c2tfdGVzdF93RU9TY1kzMUNPc0RXd3FSQXdSVmliRGhIa0JTZWpRQldGbnN3Um1Eb0w=
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codecraft-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: codecraft
+  template:
+    metadata:
+      labels:
+        app: codecraft
+    spec:
+      containers:
+        - name: codecraft-container
+          image: ayushkaranth/code-craft:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: NEXT_PUBLIC_CONVEX_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: codecraft-config
+                  key: NEXT_PUBLIC_CONVEX_URL
+            
+            - name: CONVEX_DEPLOYMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: codecraft-config
+                  key: CONVEX_DEPLOYMENT
+
+            - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: codecraft-config
+                  key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+            - name: CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: codecraft-secrets
+                  key: CLERK_SECRET_KEY
