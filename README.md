@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Code Craft
 
-## Getting Started
+Code Craft is a modern web application for sharing, executing, and collaborating on code snippets. Built with Next.js, Convex, and integrated with Clerk for authentication, it provides a seamless experience for developers to create, share, and run code in multiple languages.
 
-First, run the development server:
+## Features
+
+- **Code Execution**: Run code snippets in various programming languages including JavaScript, Python, Java, C++, and more.
+- **Snippet Sharing**: Share code snippets with the community, add comments, and star favorites.
+- **User Profiles**: Manage personal profiles with saved snippets and execution history.
+- **Real-time Collaboration**: Powered by Convex for real-time updates.
+- **Authentication**: Secure login with Clerk integration.
+- **Responsive Design**: Built with Tailwind CSS for a modern, mobile-friendly interface.
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Backend**: Convex
+- **Authentication**: Clerk
+- **Styling**: Tailwind CSS
+- **Code Editor**: Monaco Editor
+- **Monitoring**: Prometheus with prom-client
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes
+
+## Prerequisites
+
+- Node.js 18+
+- Docker
+- Kubernetes cluster (for deployment)
+- kubectl configured
+
+## Local Development
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd code-craft
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env.local` file with the following:
+   ```
+   NEXT_PUBLIC_CONVEX_URL=your-convex-url
+   CONVEX_DEPLOYMENT=your-convex-deployment
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
+   CLERK_SECRET_KEY=your-clerk-secret-key
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Docker
+
+### Building the Docker Image
+
+To containerize the application, use the provided Dockerfile:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker build -t code-craft .
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running Locally with Docker
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+docker run -p 3000:3000 code-craft
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The Dockerfile is optimized for production builds and includes:
+- Node.js 18 Alpine base image for smaller size
+- Multi-stage build for efficient caching
+- Exposed port 3000 for the Next.js app
+- Development command for local testing
 
-## Learn More
+### Pushing to Registry
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker tag code-craft ayushkaranth/code-craft:latest
+docker push ayushkaranth/code-craft:latest
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Kubernetes Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application is configured for deployment on Kubernetes using the manifests in the `k8/` directory.
 
-## Deploy on Vercel
+### Key Components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Deployment**: Manages the application pods with rolling updates
+- **Service**: Exposes the application internally
+- **ConfigMap**: Stores non-sensitive configuration
+- **Secret**: Stores sensitive data like API keys
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Deploying to Kubernetes
+
+1. Apply the Kubernetes manifests:
+   ```bash
+   kubectl apply -f k8/
+   ```
+
+2. Check deployment status:
+   ```bash
+   kubectl get pods
+   kubectl get services
+   ```
+
+3. Access the application:
+   ```bash
+   kubectl port-forward svc/codecraft-service 3000:80
+   ```
+
+The deployment includes:
+- Environment variable injection from ConfigMap and Secret
+- Health checks and resource limits
+- Rolling update strategy for zero-downtime deployments
+
+## Prometheus Monitoring
+
+The application exposes metrics via the `/api/metrics` endpoint using the `prom-client` library.
+
+### Prometheus Setup
+
+1. Deploy Prometheus using the provided configuration:
+   ```bash
+   kubectl apply -f k8/prometheus.yaml
+   ```
+
+2. Access Prometheus dashboard:
+   ```bash
+   kubectl port-forward svc/prometheus-service 9090:9090
+   ```
+
+3. Open [http://localhost:9090](http://localhost:9090) in your browser.
+
+### Metrics Configuration
+
+The Prometheus configuration scrapes metrics from:
+- The Next.js application at `/api/metrics`
+- Scraping interval: 15 seconds
+- Service discovery via Kubernetes service
+
+### Available Metrics
+
+- HTTP request counts and durations
+- Application performance metrics
+- Custom business metrics (code executions, user interactions)
+
+## API Endpoints
+
+- `GET /api/metrics`: Prometheus metrics endpoint
+- Convex functions for data operations
+- Authentication endpoints via Clerk
+
+## Scripts
+
+- `npm run dev`: Start development server
+- `npm run build`: Build for production
+- `npm run start`: Start production server
+- `npm run lint`: Run ESLint
+
+## License
+
+This project is licensed under the MIT License.
