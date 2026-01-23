@@ -33,8 +33,8 @@ Code Craft is a modern web application for sharing, executing, and collaborating
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd code-craft
+   git clone https://github.com/Ayushkaranth/Vox.git
+   cd Vox
    ```
 
 2. Install dependencies:
